@@ -1,72 +1,69 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { Statistics } from './Statistics/Statistics';
 import { FeedbackOptions } from './Feedback/FeedbackOptions';
 import { Section } from './Section/Section.jsx';
 import { Notification } from './Notification/Notification';
 
-export class App extends Component {
-  state = {
+export const App = () => {
+  const [rating, setRating] = useState({
     good: 0,
     neutral: 0,
     bad: 0,
-    total: 0,
-    positiveFeedback: 0,
-  };
+  });
 
-  handlOptions = ({ target: { name } }) => {
-    this.setState(prevState => ({ [name]: prevState[name] + 1 }));
-    this.countTotalFeedback();
-    this.countPositiveFeedbackPercentage();
-  };
+  const [totalFeedback, setTotalFeedback] = useState(0);
+  const [positiveFeedback, setPositiveFeedback] = useState(0);
 
-  countTotalFeedback = () => {
-    this.setState(prevState => {
-      const totalFeedback = prevState.good + prevState.bad + prevState.neutral;
-      return { ...prevState, total: totalFeedback };
-    });
-  };
-
-  countPositiveFeedbackPercentage = () => {
-    this.setState(prevState => {
-      const totalPercentage = (
-        (prevState.good / prevState.total) *
-        100
-      ).toFixed(1);
-      return { ...prevState, positiveFeedback: totalPercentage };
-    });
-  };
-
-  render() {
-    const { good, neutral, bad, total, positiveFeedback } = this.state;
-    return (
-      <div
-        style={{
-          display: 'flex',
-          fontFamily: 'cursive',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          marginLeft: 30,
-          fontSize: 40,
-          color: '#010101',
-        }}
-      >
-        <Section title="Please leave feedback">
-          <FeedbackOptions options={this.handlOptions} />
-        </Section>
-        <Section title="Statistics">
-          {this.state.total ? (
-            <Statistics
-              good={good}
-              neutral={neutral}
-              bad={bad}
-              total={total}
-              positiveFeedback={positiveFeedback}
-            />
-          ) : (
-            <Notification message="There is no feedback"></Notification>
-          )}
-        </Section>
-      </div>
-    );
+  function handlOptionsCount({ target: { name } }) {
+    switch (name) {
+      case 'good':
+        setRating({ ...rating, [name]: rating[name] + 1 });
+        break;
+      case 'neutral':
+        setRating({ ...rating, [name]: rating[name] + 1 });
+        break;
+      case 'bad':
+        setRating({ ...rating, [name]: rating[name] + 1 });
+        break;
+      default:
+        console.log(`bad value of ${name}`);
+    }
   }
-}
+
+  useEffect(() => {
+    setTotalFeedback(rating.good + rating.bad + rating.neutral);
+
+    setPositiveFeedback(((rating.good / totalFeedback) * 100).toFixed(1));
+  }, [rating, totalFeedback]);
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        fontFamily: 'cursive',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        marginLeft: 30,
+        fontSize: 40,
+        color: '#010101',
+      }}
+    >
+      <Section title="Please leave feedback">
+        <FeedbackOptions options={handlOptionsCount} />
+      </Section>
+      <Section title="Statistics">
+        {totalFeedback ? (
+          <Statistics
+            good={rating.good}
+            neutral={rating.neutral}
+            bad={rating.bad}
+            total={totalFeedback}
+            positiveFeedback={positiveFeedback}
+          />
+        ) : (
+          <Notification message="There is no feedback"></Notification>
+        )}
+      </Section>
+    </div>
+  );
+};
